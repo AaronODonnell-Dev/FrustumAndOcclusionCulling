@@ -16,13 +16,14 @@ namespace Frustum_and_Occlusion_Culling
         DebugEngine debug;
         ImmediateShapeDrawer shapeDrawer;
 
-        List<SimpleModel> gameObjects = new List<SimpleModel>();
+        List<GameObject3D> gameObjects = new List<GameObject3D>();
         Camera mainCamera;
 
         SpriteFont sfont;
         int objectsDrawn = 0;
 
         OcclusionQuery occQuery;
+        private QuadTree quadTree;
         Stopwatch timer = new Stopwatch();
         long totalTime = 0;
 
@@ -91,6 +92,9 @@ namespace Frustum_and_Occlusion_Culling
             mainCamera.Initialize();
 
             occQuery = new OcclusionQuery(GraphicsDevice);
+            quadTree = new QuadTree(100, Vector2.Zero, 5);
+
+            //quadTree.SubDivide();
 
             base.Initialize();
         }
@@ -98,7 +102,8 @@ namespace Frustum_and_Occlusion_Culling
         protected void AddModel(SimpleModel model)
         {
             model.Initialize();
-            gameObjects.Add(model);
+            //gameObjects.Add(model);
+            quadTree.AddObject(model);
         }
 
         protected override void LoadContent()
@@ -106,8 +111,8 @@ namespace Frustum_and_Occlusion_Culling
             spriteBatch = new SpriteBatch(GraphicsDevice);
             sfont = Content.Load<SpriteFont>("debug");
 
-            AddModel(new SimpleModel("wall0", "wall", new Vector3(0, 0, -10)));
-            AddModel(new SimpleModel("ball0", "ball", new Vector3(0, 2.5f, -120)));
+            //AddModel(new SimpleModel("wall0", "wall", new Vector3(0, 0, -10)));
+            //AddModel(new SimpleModel("ball0", "ball", new Vector3(0, 2.5f, -120)));
 
             gameObjects.ForEach(go => go.LoadContent());
         }
@@ -128,7 +133,8 @@ namespace Frustum_and_Occlusion_Culling
 
             mainCamera.Update();
 
-            gameObjects.ForEach(go => go.Update());
+            //gameObjects.ForEach(go => go.Update());
+            quadTree.Process(mainCamera.Frustum, ref gameObjects);
 
             base.Update(gameTime);
         }
@@ -136,6 +142,8 @@ namespace Frustum_and_Occlusion_Culling
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
+
+            debug.Draw(mainCamera);
 
             foreach (SimpleModel go in gameObjects)
             {
