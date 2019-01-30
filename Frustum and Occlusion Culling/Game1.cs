@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Sample;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -24,8 +25,9 @@ namespace Frustum_and_Occlusion_Culling
 
         OcclusionQuery occQuery;
         private QuadTree quadTree;
+        private OctTree octTree;
         Stopwatch timer = new Stopwatch();
-        long totalTime = 0;
+        long totalTime, totalObjects;
 
         public Game1()
         {
@@ -92,7 +94,8 @@ namespace Frustum_and_Occlusion_Culling
             mainCamera.Initialize();
 
             occQuery = new OcclusionQuery(GraphicsDevice);
-            quadTree = new QuadTree(100, Vector2.Zero, 5);
+            //quadTree = new QuadTree(100, Vector2.Zero, 5);
+            octTree = new OctTree(100, Vector3.Zero, 5);
 
             //quadTree.SubDivide();
 
@@ -103,18 +106,31 @@ namespace Frustum_and_Occlusion_Culling
         {
             model.Initialize();
             //gameObjects.Add(model);
-            quadTree.AddObject(model);
+            model.LoadContent();
+            //quadTree.AddObject(model);
+            octTree.AddObject(model);
+            totalObjects++;
         }
 
         protected override void LoadContent()
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
             sfont = Content.Load<SpriteFont>("debug");
+            Random ran = new Random();
+
+            for (int i = 0; i < 100; i++)
+            {
+                float x = ran.Next(-50, 50);
+                float y = ran.Next(-50, 50);
+                float z = ran.Next(-50, 50);
+
+                AddModel(new SimpleModel("", "ball", new Vector3(x, y, z)));
+            }
 
             //AddModel(new SimpleModel("wall0", "wall", new Vector3(0, 0, -10)));
             //AddModel(new SimpleModel("ball0", "ball", new Vector3(0, 2.5f, -120)));
 
-            gameObjects.ForEach(go => go.LoadContent());
+            //gameObjects.ForEach(go => go.LoadContent());
         }
         
         protected override void UnloadContent()
@@ -132,9 +148,10 @@ namespace Frustum_and_Occlusion_Culling
             }
 
             mainCamera.Update();
-
+            gameObjects.Clear();
             //gameObjects.ForEach(go => go.Update());
-            quadTree.Process(mainCamera.Frustum, ref gameObjects);
+            //quadTree.Process(mainCamera.Frustum, ref gameObjects);
+            octTree.Process(mainCamera.Frustum, ref gameObjects);
 
             base.Update(gameTime);
         }
@@ -159,6 +176,7 @@ namespace Frustum_and_Occlusion_Culling
 
             spriteBatch.Begin();
             spriteBatch.DrawString(sfont, "Objects Drawn: " + objectsDrawn, new Vector2(10, 10), Color.White);
+            spriteBatch.DrawString(sfont, "Occulsion Time: " + totalTime, new Vector2(10, 25), Color.White);
 
             spriteBatch.End();
 
