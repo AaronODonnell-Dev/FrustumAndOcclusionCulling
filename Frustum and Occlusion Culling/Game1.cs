@@ -24,10 +24,13 @@ namespace Frustum_and_Occlusion_Culling
         int objectsDrawn = 0;
 
         OcclusionQuery occQuery;
-        private QuadTree quadTree;
         private OctTree octTree;
         Stopwatch timer = new Stopwatch();
         long totalTime, totalObjects;
+
+        Effect colorEffect;
+        private int counter;
+        private bool drawAlt;
 
         public Game1()
         {
@@ -43,7 +46,7 @@ namespace Frustum_and_Occlusion_Culling
             shapeDrawer = new ImmediateShapeDrawer();
 
             IsMouseVisible = true;
-            Content.RootDirectory = "Content";            
+            Content.RootDirectory = "Content";
         }
 
         private bool FrustumContains(SimpleModel go)
@@ -94,20 +97,19 @@ namespace Frustum_and_Occlusion_Culling
             mainCamera.Initialize();
 
             occQuery = new OcclusionQuery(GraphicsDevice);
-            //quadTree = new QuadTree(100, Vector2.Zero, 5);
             octTree = new OctTree(100, Vector3.Zero, 5);
-
-            //quadTree.SubDivide();
 
             base.Initialize();
         }
-        
+
         protected void AddModel(SimpleModel model)
         {
             model.Initialize();
-            //gameObjects.Add(model);
             model.LoadContent();
-            //quadTree.AddObject(model);
+
+            //replace this effect on the model
+
+
             octTree.AddObject(model);
             totalObjects++;
         }
@@ -116,26 +118,16 @@ namespace Frustum_and_Occlusion_Culling
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
             sfont = Content.Load<SpriteFont>("debug");
-            Random ran = new Random();
 
-            for (int i = 0; i < 100; i++)
-            {
-                float x = ran.Next(-50, 50);
-                float y = ran.Next(-50, 50);
-                float z = ran.Next(-50, 50);
+            colorEffect = Content.Load<Effect>("Effects/BasicTexture");
 
-                AddModel(new SimpleModel("", "ball", new Vector3(x, y, z)));
-            }
+            AddModel(new TextureModel("wall", new Vector3(0, 0, 0)));
 
-            //AddModel(new SimpleModel("wall0", "wall", new Vector3(0, 0, -10)));
-            //AddModel(new SimpleModel("ball0", "ball", new Vector3(0, 2.5f, -120)));
-
-            //gameObjects.ForEach(go => go.LoadContent());
         }
-        
+
         protected override void UnloadContent()
         {
-            
+
         }
 
         protected override void Update(GameTime gameTime)
@@ -155,22 +147,18 @@ namespace Frustum_and_Occlusion_Culling
 
             base.Update(gameTime);
         }
-        
+
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            debug.Draw(mainCamera);
+            //debug.Draw(mainCamera);
 
             foreach (SimpleModel go in gameObjects)
             {
                 if (FrustumContains(go))
                 {
-                    if (!IsOcculded(go))
-                    {
-                        go.Draw(mainCamera);
-                        objectsDrawn++;
-                    }
+                    go.Draw(mainCamera);
                 }
             }
 

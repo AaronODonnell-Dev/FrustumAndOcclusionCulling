@@ -36,7 +36,7 @@ namespace Frustum_and_Occlusion_Culling
 
 
 
-            DebugEngine.AddBoundingBox(Bounds, Color.Red, 100);
+            DebugEngine.AddBoundingBox(Bounds, Color.Red, 1000);
             DebugEngine.AddBoundingSphere(new BoundingSphere(new Vector3(position.X, position.Y,position.Z), 1), Color.Black, 1000);
         }
 

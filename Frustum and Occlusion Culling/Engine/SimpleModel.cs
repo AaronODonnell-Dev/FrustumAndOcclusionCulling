@@ -13,7 +13,7 @@ namespace Sample
     {
         public Model Model { get; set; }
         public Matrix[] BoneTransforms { get; set; }
-       protected string _asset;
+        protected string _asset;
 
         public BoundingBox AABB { get; set; }
 
